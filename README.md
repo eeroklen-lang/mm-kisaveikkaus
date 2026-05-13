@@ -136,20 +136,28 @@ Käyttäjien jäsenyydet porukkoihin (monta-moneen).
 - [x] Projektin pystytys (Next.js + Supabase)
 - [x] Kirjautuminen ja rekisteröityminen (ei vaadi kutsukoodia)
 - [x] Pelilista ja veikkausten tallennus
-- [x] Veikkauksen lukitus pelin alkaessa
+- [x] Veikkauksen lukitus pelin alkaessa (UI + palvelinpuolen validointi)
 - [x] Tulostaulu porukan mukaan suodatettuna
 - [x] Usean porukan tuki (group_memberships)
 - [x] Admin-sivu kutsukoodien hallintaan
 - [x] Football API -integraatio (manuaalinen synkronointi)
 - [x] Automaattinen pisteiden laskenta synkronoinnin yhteydessä
 - [x] Tilastot pelien kohdalla (ennen peliä: veikkausjakauma, jälkeen: onnistumisprosentti)
-- [x] Tulostaululle esille mihin porukkaan kuuluu (luon koodit kuvaavina niminä)
 - [x] Admin voi syöttää tuloksen manuaalisesti API:n varana
 - [x] Näyttönimen muokkaus suoraan veikkaussivulla
-- [ ] Mobiilinavigaatio — header on liian täynnä, hamburger-valikko tai bottom navigation
-- [ ] Värimaailma ja brändäys — yhtenäinen väripaletti, logo/otsikko tyylitelty
-- [ ] Pelilistan luettavuus — joukkueiden liput tai lyhenteet, selkeämpi hierarkia
+- [x] Mobiilinavigaatio — bottom navigation
+- [x] Värimaailma ja brändäys — tumma violetti FIFA 2026 -henkinen teema
+- [x] Pelilistan luettavuus — joukkueiden liput ja nimet suomeksi
+- [ ] Salasanan nollaus — unohtunut salasana pitää voida palauttaa
+- [ ] Aikavyöhyke — otteluajat näytetään UTC:nä, pitäisi näkyä +3h (EEST)
+- [ ] Veikkausten paljastus — pelin alettua näytä mitä muut veikkasivat
+- [ ] Suodatus — näytä vain tulevat / vain menneet ottelut erikseen
 - [ ] Tyhjät tilat — paremmat viestit kun ei pelejä, ei veikkauksia tai ei porukkaläisiä
 - [ ] Lataustilanteen parannus — skeleton-loader tai animaatio sivuja ladattaessa
 - [ ] Julkaisu (Vercel)
-- [ ] Testit ydinominaisuuksille (julkaisun jälkeen)
+
+### Ehkä myöhemmin
+- [ ] Admin: automaattinen synkronointi — cron-ajo tulosten päivittämiseen
+- [ ] Omien pisteiden erittely — näytä per ottelu mitä pisteitä sai
+- [ ] Myöhään liittyneet — käsittely kun porukalle liittyy kisojen aikana
+- [ ] Pudotuspelien pisteytys — jatkoaika ja rangaistuspotkut

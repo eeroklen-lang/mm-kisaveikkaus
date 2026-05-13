@@ -90,6 +90,28 @@ export async function syncMatches() {
   return { success: true, count: matches.length }
 }
 
+export async function requestPasswordReset(_: unknown, formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+  const { headers } = await import('next/headers')
+  const headerStore = await headers()
+  const host = headerStore.get('host') ?? 'localhost:3000'
+  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+  const redirectTo = `${protocol}://${host}/auth/callback?next=/reset-password`
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
+export async function updatePassword(_: unknown, formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: error.message }
+  redirect('/')
+}
+
 export async function login(_: unknown, formData: FormData) {
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({
@@ -154,6 +176,16 @@ export async function savePrediction(_: unknown, formData: FormData) {
   const homeScore = Number(formData.get('home_score'))
   const awayScore = Number(formData.get('away_score'))
 
+  const { data: match } = await supabase
+    .from('matches')
+    .select('status')
+    .eq('id', matchId)
+    .single()
+
+  if (!match || match.status !== 'SCHEDULED') {
+    return { error: 'Peli on jo alkanut, veikkausta ei voi enää muuttaa' }
+  }
+
   const { error } = await supabase.from('predictions').upsert(
     { user_id: user.id, match_id: matchId, home_score: homeScore, away_score: awayScore },
     { onConflict: 'user_id,match_id' }
@@ -182,22 +214,19 @@ export async function updateDisplayName(_: unknown, formData: FormData) {
   return { success: true }
 }
 
-export async function createInviteCode(formData: FormData) {
+export async function createInviteCode(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== process.env.ADMIN_EMAIL) return { error: 'Ei oikeuksia' }
+  if (user?.email !== process.env.ADMIN_EMAIL) return
 
   const customCode = (formData.get('custom_code') as string | null)?.trim().toUpperCase()
   const code = customCode || randomBytes(3).toString('hex').toUpperCase()
 
-  const { error } = await supabase.from('invite_codes').insert({ code })
-  if (error) return { error: error.code === '23505' ? 'Koodi on jo olemassa' : error.message }
-
+  await supabase.from('invite_codes').insert({ code })
   revalidatePath('/admin')
-  return { success: true, code }
 }
 
-export async function updateMatchResult(formData: FormData) {
+export async function updateMatchResult(_: unknown, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user?.email !== process.env.ADMIN_EMAIL) return { error: 'Ei oikeuksia' }

@@ -26,7 +26,7 @@ export default function ResultForm({ matches }: { matches: Match[] }) {
           className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           {matches.map((m) => (
             <option key={m.id} value={m.id}>
-              {new Date(m.match_date).toLocaleDateString('fi-FI', { day: 'numeric', month: 'numeric' })}
+              {new Date(m.match_date).toLocaleDateString('fi-FI', { day: 'numeric', month: 'numeric', timeZone: 'Europe/Helsinki' })}
               {' '}{m.home_team} vs {m.away_team}
             </option>
           ))}

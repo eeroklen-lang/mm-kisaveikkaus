@@ -12,12 +12,12 @@ export default function DisplayNameEditor({ name }: { name: string }) {
         name="display_name"
         defaultValue={name}
         required
-        className="text-sm border-b border-gray-300 bg-transparent w-28 focus:outline-none focus:border-blue-500 text-gray-700"
+        className="text-sm border-b border-slate-700 bg-transparent w-28 focus:outline-none focus:border-blue-500 text-slate-300"
       />
       <button
         type="submit"
         disabled={pending}
-        className="text-xs text-gray-400 hover:text-blue-600 disabled:opacity-50 px-1"
+        className="text-xs text-slate-600 hover:text-blue-400 disabled:opacity-50 px-1"
       >
         {pending ? '...' : state?.success ? '✓' : 'Tallenna'}
       </button>

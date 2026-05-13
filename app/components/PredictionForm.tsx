@@ -21,9 +21,9 @@ export default function PredictionForm({ matchId, prediction }: Props) {
         max="20"
         defaultValue={prediction?.home_score ?? ''}
         required
-        className="w-12 border rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-12 bg-slate-700 border border-slate-600 text-slate-100 rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <span className="text-gray-400 text-sm">–</span>
+      <span className="text-slate-600 text-sm">–</span>
       <input
         name="away_score"
         type="number"
@@ -31,12 +31,12 @@ export default function PredictionForm({ matchId, prediction }: Props) {
         max="20"
         defaultValue={prediction?.away_score ?? ''}
         required
-        className="w-12 border rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-12 bg-slate-700 border border-slate-600 text-slate-100 rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
         type="submit"
         disabled={pending}
-        className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 disabled:opacity-50 font-medium"
+        className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-500 disabled:opacity-50 font-medium"
       >
         {pending ? '...' : state?.success ? 'Tallennettu!' : prediction ? 'Päivitä' : 'Tallenna'}
       </button>

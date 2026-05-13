@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #0d0621;
+  color: #f5f3ff;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+  Unlayered rules override @layer utilities — forces hex colors
+  instead of Tailwind v4's oklch for consistent cross-device rendering.
+  Colors use FIFA WC 2026 inspired dark-purple palette.
+*/
+.bg-slate-950 { background-color: #04010f; }
+.bg-slate-900 { background-color: #0d0621; }
+.bg-slate-800 { background-color: #160d35; }
+.bg-slate-700 { background-color: #261654; }
+.bg-slate-600 { background-color: #3b2068; }
+
+header { background-color: #2d1b69; }
+
+.border-slate-800 { border-color: #261654; }
+.border-slate-700 { border-color: #3b2068; }
+.border-slate-600 { border-color: #5b21b6; }
+
+.text-slate-100 { color: #f5f3ff; }
+.text-slate-200 { color: #ede9fe; }
+.text-slate-300 { color: #ddd6fe; }
+.text-slate-400 { color: #a78bfa; }
+.text-slate-500 { color: #7c6fa0; }
+.text-slate-600 { color: #5b4a8a; }
+.text-slate-700 { color: #3d2a7a; }

@@ -64,22 +64,22 @@ export default async function Tulokset({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0 z-10">
+    <div className="min-h-screen bg-slate-900">
+      <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="font-bold text-lg">Tulostaulu</h1>
+          <h1 className="font-black text-lg text-slate-100 uppercase tracking-tight">Tulostaulu</h1>
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/liity" className="text-sm text-blue-600 hover:underline">Liity porukkaan</Link>
-            <Link href="/" className="text-sm text-blue-600 hover:underline">Veikkaukset</Link>
+            <Link href="/liity" className="text-sm text-blue-400 hover:underline">Liity porukkaan</Link>
+            <Link href="/" className="text-sm text-blue-400 hover:underline">Veikkaukset</Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-6 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 py-6 pb-32 md:pb-6 space-y-4">
         {groups.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center">
-            <p className="text-gray-500 mb-3">Et ole vielä missään porukassa.</p>
-            <Link href="/liity" className="text-blue-600 text-sm hover:underline">Liity porukkaan kutsukoodilla</Link>
+          <div className="bg-slate-800 rounded-xl border border-slate-700 p-8 text-center">
+            <p className="text-slate-500 mb-3">Et ole vielä missään porukassa.</p>
+            <Link href="/liity" className="text-blue-400 text-sm hover:underline">Liity porukkaan kutsukoodilla</Link>
           </div>
         ) : (
           <>
@@ -92,7 +92,7 @@ export default async function Tulokset({
                     className={`px-3 py-2 rounded-full text-sm font-medium border ${
                       code === activeGroup
                         ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                        : 'bg-slate-700 text-slate-400 border-slate-600 hover:border-blue-500'
                     }`}
                   >
                     {code}
@@ -103,34 +103,40 @@ export default async function Tulokset({
 
             {activeGroup && (
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Porukka</p>
-                <h2 className="text-xl font-bold tracking-wide">{activeGroup}</h2>
+                <p className="text-xs text-slate-600 uppercase tracking-widest mb-1">Porukka</p>
+                <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight">{activeGroup}</h2>
               </div>
             )}
 
-            <div className="bg-white rounded-xl border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="px-4 py-2 text-left text-gray-500 font-medium w-8">#</th>
-                    <th className="px-4 py-2 text-left text-gray-500 font-medium">Pelaaja</th>
-                    <th className="px-4 py-2 text-right text-gray-500 font-medium">Oikeat</th>
-                    <th className="px-4 py-2 text-right text-gray-500 font-medium">Pisteet</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row, i) => (
-                    <tr key={row.display_name} className="border-b last:border-0">
-                      <td className="px-4 py-3 text-gray-400">{i + 1}</td>
-                      <td className="px-4 py-3 font-medium">{row.display_name}</td>
-                      <td className="px-4 py-3 text-right text-gray-500">{row.correct}</td>
-                      <td className="px-4 py-3 text-right font-bold">{row.total}</td>
+            {rows.length === 0 ? (
+              <div className="bg-slate-800 rounded-xl border border-slate-700 p-8 text-center">
+                <p className="text-slate-500 text-sm">Pisteitä kertyy kun pelejä on pelattu.</p>
+              </div>
+            ) : (
+              <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-700 bg-slate-700/50">
+                      <th className="px-4 py-2 text-left text-slate-500 font-medium w-8">#</th>
+                      <th className="px-4 py-2 text-left text-slate-500 font-medium">Pelaaja</th>
+                      <th className="px-4 py-2 text-right text-slate-500 font-medium">Oikeat</th>
+                      <th className="px-4 py-2 text-right text-slate-500 font-medium">Pisteet</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="text-xs text-gray-400 text-center">Oikea tulos = 3p · Oikea voittaja = 1p</p>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, i) => (
+                      <tr key={row.display_name} className="border-b border-slate-700 last:border-0">
+                        <td className="px-4 py-3 text-slate-600">{i + 1}</td>
+                        <td className="px-4 py-3 font-medium text-slate-100">{row.display_name}</td>
+                        <td className="px-4 py-3 text-right text-slate-500">{row.correct}</td>
+                        <td className="px-4 py-3 text-right font-black text-slate-100">{row.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="text-xs text-slate-600 text-center">Oikea tulos = 3p · Oikea voittaja = 1p</p>
           </>
         )}
       </main>

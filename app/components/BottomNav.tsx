@@ -38,7 +38,10 @@ export default function BottomNav() {
   if (pathname === '/login') return null
 
   return (
-    <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, paddingBottom: 'env(safe-area-inset-bottom)' }} className="md:hidden bg-white border-t">
+    <nav
+      style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, backgroundColor: '#160d35', borderTop: '1px solid #3b2068', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="md:hidden"
+    >
       <div className="flex">
         {items.map((item) => {
           const active = pathname === item.href
@@ -47,7 +50,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
-                active ? 'text-blue-600' : 'text-gray-400'
+                active ? 'text-blue-400' : 'text-slate-600'
               }`}
             >
               {item.icon}
