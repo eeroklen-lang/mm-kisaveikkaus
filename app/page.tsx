@@ -170,7 +170,7 @@ function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; 
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-sm flex-1 text-slate-100">
+        <span className="font-semibold text-base flex-1 text-slate-100">
           <span className="mr-1">{getFlag(match.home_team)}</span>{getTeamName(match.home_team)}
         </span>
         {isFinished ? (
@@ -180,7 +180,7 @@ function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; 
         ) : (
           <span className="text-slate-700 text-sm shrink-0">vs</span>
         )}
-        <span className="font-semibold text-sm flex-1 text-right text-slate-100">
+        <span className="font-semibold text-base flex-1 text-right text-slate-100">
           {getTeamName(match.away_team)}<span className="ml-1">{getFlag(match.away_team)}</span>
         </span>
       </div>
