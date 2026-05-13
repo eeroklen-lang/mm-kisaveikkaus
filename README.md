@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MM-Veikkaus 2026
 
-## Getting Started
+Jalkapallon MM-kisaveikkaus-sovellus kaveri- ja työporukoille.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Yleiskuvaus
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Käyttäjät voivat veikkata kaikkien MM 2026 -pelien tuloksia. Sovelluksessa voi kuulua useaan eri porukkaan, ja jokainen porukka näkee oman tulostaulunsa. Pelit ja tulokset haetaan manuaalisesti football-data.org-rajapinnasta admin-sivun kautta.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pisteytysjärjestelmä
 
-## Learn More
+| Tulos | Pisteet |
+|---|---|
+| Oikea tulos (esim. 2–1 oikein) | 3 pistettä |
+| Oikea voittaja tai tasapeli (lopputulos oikein, maalit väärin) | 1 piste |
+| Väärä | 0 pistettä |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Käyttäjäpolku
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Rekisteröityminen** — sähköposti + salasana, ei vaadi kutsukoodia
+2. **Kirjautuminen** — tavallinen sisäänkirjautuminen
+3. **Porukkoihin liittyminen** — kirjautuneena käyttäjä syöttää kutsukoodin `/liity`-sivulla; voi liittyä useampaan porukkaan
+4. **Veikkaaminen** — käyttäjä veikkaa jokaisen pelin tuloksen ennen pelin alkua; veikkaus lukittuu kun peli alkaa
+5. **Tulostaulu** — näyttää yhden porukan pisteet kerrallaan; jos useassa porukassa, voi valita minkä porukan tulostaulun näkee
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Admin-toiminnot
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sovelluksen omistaja (admin) pääsee `/admin`-sivulle, jossa voi:
+- Luoda uusia kutsukoodeja (oma tai satunnainen)
+- Poistaa kutsukoodeja käytöstä
+- Synkronoida pelit ja tulokset football-data.orgista manuaalisesti
+
+Admin tunnistetaan sähköpostin perusteella (`ADMIN_EMAIL`-ympäristömuuttuja).
+
+---
+
+## Tietokantarakenne
+
+### `matches`
+Pelien tiedot haetaan API:sta ja tallennetaan tähän tauluun.
+
+| Sarake | Tyyppi | Kuvaus |
+|---|---|---|
+| id | serial | Pääavain |
+| api_id | int | football-data.org:n pelin ID |
+| home_team | text | Kotijoukkue |
+| away_team | text | Vierasjoukkue |
+| match_date | timestamptz | Pelin alkuaika |
+| home_score | int | Kotijoukkueen maalit (null ennen peliä) |
+| away_score | int | Vierasjoukkueen maalit (null ennen peliä) |
+| status | text | SCHEDULED / IN_PLAY / FINISHED |
+| stage | text | Lohkovaihe / Pudotuspelit jne. |
+
+### `predictions`
+Käyttäjien veikkaukset.
+
+| Sarake | Tyyppi | Kuvaus |
+|---|---|---|
+| id | serial | Pääavain |
+| user_id | uuid | Viittaus käyttäjään |
+| match_id | int | Viittaus peliin |
+| home_score | int | Veikkattu kotitulos |
+| away_score | int | Veikkattu vierastulos |
+| points | int | Lasketut pisteet (null kunnes peli päättyy) |
+
+### `profiles`
+Käyttäjäprofiilit (luodaan automaattisesti rekisteröityessä).
+
+| Sarake | Tyyppi | Kuvaus |
+|---|---|---|
+| id | uuid | Viittaus auth.users |
+| display_name | text | Näyttönimi (oletuksena sähköpostin alkuosa) |
+
+### `invite_codes`
+Kutsukoodit porukkoihin liittymistä varten.
+
+| Sarake | Tyyppi | Kuvaus |
+|---|---|---|
+| code | text | Pääavain, esim. "MM2026" |
+| is_active | boolean | Onko koodi voimassa |
+| created_at | timestamptz | Luontiaika |
+
+### `group_memberships`
+Käyttäjien jäsenyydet porukkoihin (monta-moneen).
+
+| Sarake | Tyyppi | Kuvaus |
+|---|---|---|
+| user_id | uuid | Viittaus käyttäjään |
+| invite_code | text | Viittaus kutsukoodiin |
+| joined_at | timestamptz | Liittymisaika |
+
+---
+
+## Tekninen pino
+
+- **Frontend & Backend:** Next.js 16 (App Router, Server Components, Server Actions)
+- **Tietokanta & Auth:** Supabase (PostgreSQL + Row Level Security)
+- **Pelidata:** football-data.org REST API
+- **Tyyli:** Tailwind CSS
+
+---
+
+## Ympäristömuuttujat
+
+| Muuttuja | Kuvaus |
+|---|---|
+| NEXT_PUBLIC_SUPABASE_URL | Supabase-projektin URL |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon-avain |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role -avain (admin-operaatioihin) |
+| FOOTBALL_DATA_API_KEY | football-data.org API-avain |
+| ADMIN_EMAIL | Admin-käyttäjän sähköposti |
+
+---
+
+## Sivukartta
+
+| Reitti | Kuvaus |
+|---|---|
+| `/login` | Kirjautuminen ja rekisteröityminen |
+| `/` | Pelilista ja veikkausten syöttö |
+| `/liity` | Porukkoihin liittyminen kutsukoodilla |
+| `/tulokset` | Tulostaulu (porukan mukaan suodatettuna) |
+| `/admin` | Kutsukoodien hallinta ja pelien synkronointi (vain admin) |
+
+---
+
+## Toteutusjärjestys
+
+- [x] Projektin pystytys (Next.js + Supabase)
+- [x] Kirjautuminen ja rekisteröityminen (ei vaadi kutsukoodia)
+- [x] Pelilista ja veikkausten tallennus
+- [x] Veikkauksen lukitus pelin alkaessa
+- [x] Tulostaulu porukan mukaan suodatettuna
+- [x] Usean porukan tuki (group_memberships)
+- [x] Admin-sivu kutsukoodien hallintaan
+- [x] Football API -integraatio (manuaalinen synkronointi)
+- [x] Automaattinen pisteiden laskenta synkronoinnin yhteydessä
+- [x] Tilastot pelien kohdalla (ennen peliä: veikkausjakauma, jälkeen: onnistumisprosentti)
+- [x] Tulostaululle esille mihin porukkaan kuuluu (luon koodit kuvaavina niminä)
+- [x] Admin voi syöttää tuloksen manuaalisesti API:n varana
+- [x] Näyttönimen muokkaus suoraan veikkaussivulla
+- [ ] Mobiilinavigaatio — header on liian täynnä, hamburger-valikko tai bottom navigation
+- [ ] Värimaailma ja brändäys — yhtenäinen väripaletti, logo/otsikko tyylitelty
+- [ ] Pelilistan luettavuus — joukkueiden liput tai lyhenteet, selkeämpi hierarkia
+- [ ] Tyhjät tilat — paremmat viestit kun ei pelejä, ei veikkauksia tai ei porukkaläisiä
+- [ ] Lataustilanteen parannus — skeleton-loader tai animaatio sivuja ladattaessa
+- [ ] Julkaisu (Vercel)
+- [ ] Testit ydinominaisuuksille (julkaisun jälkeen)

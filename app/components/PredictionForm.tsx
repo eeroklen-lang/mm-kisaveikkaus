@@ -1,0 +1,45 @@
+'use client'
+
+import { useActionState } from 'react'
+import { savePrediction } from '@/app/actions'
+
+type Props = {
+  matchId: number
+  prediction: { home_score: number; away_score: number } | null
+}
+
+export default function PredictionForm({ matchId, prediction }: Props) {
+  const [state, action, pending] = useActionState(savePrediction, null)
+
+  return (
+    <form action={action} className="flex items-center gap-2 mt-2">
+      <input type="hidden" name="match_id" value={matchId} />
+      <input
+        name="home_score"
+        type="number"
+        min="0"
+        max="20"
+        defaultValue={prediction?.home_score ?? ''}
+        required
+        className="w-12 border rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <span className="text-gray-400 text-sm">–</span>
+      <input
+        name="away_score"
+        type="number"
+        min="0"
+        max="20"
+        defaultValue={prediction?.away_score ?? ''}
+        required
+        className="w-12 border rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 disabled:opacity-50 font-medium"
+      >
+        {pending ? '...' : state?.success ? 'Tallennettu!' : prediction ? 'Päivitä' : 'Tallenna'}
+      </button>
+    </form>
+  )
+}
