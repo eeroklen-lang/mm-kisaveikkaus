@@ -102,7 +102,7 @@ Käyttäjien jäsenyydet porukkoihin (monta-moneen).
 
 - **Frontend & Backend:** Next.js 16 (App Router, Server Components, Server Actions)
 - **Tietokanta & Auth:** Supabase (PostgreSQL + Row Level Security)
-- **Pelidata:** football-data.org REST API
+- **Pelidata:** football-data.org REST API (ilmainen taso, 10 pyyntöä/min)
 - **Tyyli:** Tailwind CSS
 
 ---
@@ -114,7 +114,7 @@ Käyttäjien jäsenyydet porukkoihin (monta-moneen).
 | NEXT_PUBLIC_SUPABASE_URL | Supabase-projektin URL |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon-avain |
 | SUPABASE_SERVICE_ROLE_KEY | Supabase service role -avain (admin-operaatioihin) |
-| FOOTBALL_DATA_API_KEY | football-data.org API-avain |
+| FOOTBALL_DATA_API_KEY | football-data.org API-avain (ilmainen rekisteröinti, 10 pyyntöä/min) |
 | ADMIN_EMAIL | Admin-käyttäjän sähköposti |
 
 ---
@@ -148,16 +148,19 @@ Käyttäjien jäsenyydet porukkoihin (monta-moneen).
 - [x] Mobiilinavigaatio — bottom navigation
 - [x] Värimaailma ja brändäys — tumma violetti FIFA 2026 -henkinen teema
 - [x] Pelilistan luettavuus — joukkueiden liput ja nimet suomeksi
-- [ ] Salasanan nollaus — unohtunut salasana pitää voida palauttaa
-- [ ] Aikavyöhyke — otteluajat näytetään UTC:nä, pitäisi näkyä +3h (EEST)
-- [ ] Veikkausten paljastus — pelin alettua näytä mitä muut veikkasivat
-- [ ] Suodatus — näytä vain tulevat / vain menneet ottelut erikseen
-- [ ] Tyhjät tilat — paremmat viestit kun ei pelejä, ei veikkauksia tai ei porukkaläisiä
-- [ ] Lataustilanteen parannus — skeleton-loader tai animaatio sivuja ladattaessa
-- [ ] Julkaisu (Vercel)
+- [x] Salasanan nollaus — unohtunut salasana pitää voida palauttaa
+- [x] Aikavyöhyke — otteluajat näytetään UTC:nä, pitäisi näkyä +3h (EEST)
+- [x] Veikkausten paljastus — pelin alettua näytä mitä muut veikkasivat
+- [x] Suodatus — näytä vain tulevat / vain menneet ottelut erikseen
+- [x] Tyhjät tilat — paremmat viestit kun ei pelejä, ei veikkauksia tai ei porukkaläisiä
+- [x] Lataustilanteen parannus — skeleton-loader tai animaatio sivuja ladattaessa
+- [x] Julkaisu (Vercel)
+- [ ] Onboarding — tervetuloa-modal uusille käyttäjille, selittää pisteytysjärjestelmän ja ohjaa liittymään porukkaan
 
 ### Ehkä myöhemmin
 - [ ] Admin: automaattinen synkronointi — cron-ajo tulosten päivittämiseen
 - [ ] Omien pisteiden erittely — näytä per ottelu mitä pisteitä sai
 - [ ] Myöhään liittyneet — käsittely kun porukalle liittyy kisojen aikana
 - [ ] Pudotuspelien pisteytys — jatkoaika ja rangaistuspotkut
+- [ ] Maalin tekijät — football-data.org palauttaa jo maalintekijät ja syöttäjät, voisi näyttää ottelun alla
+- [ ] Kokoonpanot — API tarjoaa joukkueiden kokoonpanot ja pelaajaprofiiilit

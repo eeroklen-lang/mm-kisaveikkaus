@@ -196,6 +196,14 @@ export async function savePrediction(_: unknown, formData: FormData) {
   return { success: true }
 }
 
+export async function markOnboarded() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('profiles').update({ onboarded: true }).eq('id', user.id)
+  revalidatePath('/')
+}
+
 export async function updateDisplayName(_: unknown, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

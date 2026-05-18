@@ -3,6 +3,7 @@ import { logout } from '@/app/actions'
 import PredictionForm from '@/app/components/PredictionForm'
 import DisplayNameEditor from '@/app/components/DisplayNameEditor'
 import { getFlag, getTeamName } from '@/lib/team-flags'
+import WelcomeModal from '@/app/components/WelcomeModal'
 import Link from 'next/link'
 
 type Match = {
@@ -108,9 +109,10 @@ function PointsBadge({ points }: { points: number | null }) {
 function RevealedPredictions({ preds, match }: { preds: RevealedPrediction[]; match: Match }) {
   const isFinished = match.status === 'FINISHED'
   const sorted = [...preds].sort((a, b) => (b.points ?? -1) - (a.points ?? -1))
+  const displayed = isFinished ? sorted.slice(0, 3) : sorted
   return (
     <div className="mt-3 space-y-1 border-t border-slate-700 pt-2">
-      {sorted.map((p, i) => {
+      {displayed.map((p, i) => {
         const pts = p.points
         const color = pts === 3 ? 'text-green-400' : pts === 1 ? 'text-yellow-400' : isFinished ? 'text-slate-600' : 'text-slate-400'
         return (
@@ -208,7 +210,6 @@ function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; 
         <OutcomeBar stats={stats} homeTeam={match.home_team} awayTeam={match.away_team} />
       )}
 
-      {isFinished && <FinishedStats stats={stats} />}
       {(isLive || isFinished) && revealedPreds.length > 0 && (
         <RevealedPredictions preds={revealedPreds} match={match} />
       )}
@@ -226,13 +227,24 @@ export default async function Home({
   const { nayta } = await searchParams
   const filter: 'kaikki' | 'tulevat' | 'menneet' = nayta === 'tulevat' ? 'tulevat' : nayta === 'menneet' ? 'menneet' : 'kaikki'
 
-  const [{ data: matches }, { data: myPredictions }, { data: allPredictions }, { data: profile }, { data: profiles }] = await Promise.all([
+  const [{ data: matches }, { data: myPredictions }, { data: allPredictions }, { data: profile }, { data: profiles }, { data: myMemberships }] = await Promise.all([
     supabase.from('matches').select('*').order('match_date'),
     supabase.from('predictions').select('*').eq('user_id', user!.id),
     supabase.from('predictions').select('match_id, user_id, home_score, away_score, points'),
-    supabase.from('profiles').select('display_name').eq('id', user!.id).single(),
+    supabase.from('profiles').select('display_name, onboarded').eq('id', user!.id).single(),
     supabase.from('profiles').select('id, display_name'),
+    supabase.from('group_memberships').select('invite_code').eq('user_id', user!.id),
   ])
+
+  const userGroups = (myMemberships ?? []).map((m) => m.invite_code)
+  let groupMemberIds = new Set<string>([user!.id])
+  if (userGroups.length > 0) {
+    const { data: allMembers } = await supabase
+      .from('group_memberships')
+      .select('user_id')
+      .in('invite_code', userGroups)
+    for (const m of allMembers ?? []) groupMemberIds.add(m.user_id)
+  }
 
   const profileMap = new Map<string, string>(
     (profiles ?? []).map((p: { id: string; display_name: string }) => [p.id, p.display_name])
@@ -249,14 +261,16 @@ export default async function Home({
     existing.push(p)
     allPredsByMatch.set(p.match_id, existing)
 
-    const revealed = revealedPredsByMatch.get(p.match_id) ?? []
-    revealed.push({
-      display_name: profileMap.get(p.user_id) ?? p.user_id,
-      home_score: p.home_score,
-      away_score: p.away_score,
-      points: p.points,
-    })
-    revealedPredsByMatch.set(p.match_id, revealed)
+    if (groupMemberIds.has(p.user_id)) {
+      const revealed = revealedPredsByMatch.get(p.match_id) ?? []
+      revealed.push({
+        display_name: profileMap.get(p.user_id) ?? p.user_id,
+        home_score: p.home_score,
+        away_score: p.away_score,
+        points: p.points,
+      })
+      revealedPredsByMatch.set(p.match_id, revealed)
+    }
   }
 
   const allMatches = matches ?? []
@@ -270,6 +284,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-slate-900">
+      {!profile?.onboarded && <WelcomeModal />}
       <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="font-black text-lg text-slate-100 uppercase tracking-tight">MM-Veikkaus 2026</h1>
