@@ -39,7 +39,7 @@ export default function WelcomeModal() {
             type="submit"
             className="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 rounded-xl transition-colors"
           >
-            Aloita veikkaaminen
+            Liity porukkaan
           </button>
         </form>
       </div>

@@ -147,9 +147,12 @@ export async function joinGroup(_: unknown, formData: FormData) {
 
   if (!invite?.is_active) return { error: 'Virheellinen tai vanhentunut kutsukoodi' }
 
+  const has_stake = formData.get('has_stake') === 'on'
+
   const { error } = await supabase.from('group_memberships').insert({
     user_id: user.id,
     invite_code: code,
+    has_stake,
   })
 
   if (error) {
@@ -201,7 +204,7 @@ export async function markOnboarded() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
   await supabase.from('profiles').update({ onboarded: true }).eq('id', user.id)
-  revalidatePath('/')
+  redirect('/liity')
 }
 
 export async function updateDisplayName(_: unknown, formData: FormData) {
@@ -211,6 +214,7 @@ export async function updateDisplayName(_: unknown, formData: FormData) {
 
   const name = (formData.get('display_name') as string).trim()
   if (!name) return { error: 'Nimi ei voi olla tyhjä' }
+  if (name.length > 30) return { error: 'Nimi voi olla enintään 30 merkkiä' }
 
   const { error } = await supabase
     .from('profiles')
@@ -222,7 +226,7 @@ export async function updateDisplayName(_: unknown, formData: FormData) {
   return { success: true }
 }
 
-export async function createInviteCode(formData: FormData): Promise<void> {
+export async function createInviteCode(formData: FormData): Promise<{ error?: string } | void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user?.email !== process.env.ADMIN_EMAIL) return
@@ -230,7 +234,8 @@ export async function createInviteCode(formData: FormData): Promise<void> {
   const customCode = (formData.get('custom_code') as string | null)?.trim().toUpperCase()
   const code = customCode || randomBytes(3).toString('hex').toUpperCase()
 
-  await supabase.from('invite_codes').insert({ code })
+  const { error } = await supabase.from('invite_codes').insert({ code })
+  if (error) return { error: error.message }
   revalidatePath('/admin')
 }
 
@@ -243,6 +248,13 @@ export async function updateMatchResult(_: unknown, formData: FormData) {
   const matchId = Number(formData.get('match_id'))
   const homeScore = Number(formData.get('home_score'))
   const awayScore = Number(formData.get('away_score'))
+
+  if (
+    !Number.isInteger(homeScore) || !Number.isInteger(awayScore) ||
+    homeScore < 0 || awayScore < 0 || homeScore > 20 || awayScore > 20
+  ) {
+    return { error: 'Virheellinen tulos' }
+  }
 
   const { error } = await admin
     .from('matches')

@@ -39,6 +39,17 @@ export default function LiityPage() {
                     className="w-full bg-slate-700 border border-slate-600 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase tracking-widest placeholder:text-slate-600"
                   />
                 </div>
+                <div className="border border-slate-700 rounded-lg p-4 space-y-1">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      name="has_stake"
+                      type="checkbox"
+                      className="mt-0.5 w-4 h-4 accent-violet-500 shrink-0"
+                    />
+                    <span className="text-sm text-slate-300">Osallistun porukan rahalliseen panokseen</span>
+                  </label>
+                  <p className="text-xs text-slate-600 pl-7">Tieto tallennetaan vain tilastointia varten, eikä sitä jaeta muille.</p>
+                </div>
                 {state?.error && <p className="text-red-400 text-sm">{state.error}</p>}
                 <button
                   type="submit"
