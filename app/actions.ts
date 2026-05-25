@@ -226,7 +226,7 @@ export async function updateDisplayName(_: unknown, formData: FormData) {
   return { success: true }
 }
 
-export async function createInviteCode(formData: FormData): Promise<{ error?: string } | void> {
+export async function createInviteCode(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user?.email !== process.env.ADMIN_EMAIL) return
@@ -235,7 +235,7 @@ export async function createInviteCode(formData: FormData): Promise<{ error?: st
   const code = customCode || randomBytes(3).toString('hex').toUpperCase()
 
   const { error } = await supabase.from('invite_codes').insert({ code })
-  if (error) return { error: error.message }
+  if (error) { console.error('createInviteCode:', error.message); return }
   revalidatePath('/admin')
 }
 
