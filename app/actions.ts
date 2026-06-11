@@ -181,11 +181,11 @@ export async function savePrediction(_: unknown, formData: FormData) {
 
   const { data: match } = await supabase
     .from('matches')
-    .select('status')
+    .select('status, match_date')
     .eq('id', matchId)
     .single()
 
-  if (!match || match.status !== 'SCHEDULED') {
+  if (!match || match.status !== 'SCHEDULED' || new Date(match.match_date) <= new Date()) {
     return { error: 'Peli on jo alkanut, veikkausta ei voi enää muuttaa' }
   }
 

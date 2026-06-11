@@ -131,7 +131,7 @@ function RevealedPredictions({ preds, match }: { preds: RevealedPrediction[]; ma
 
 function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; prediction: Prediction | null; stats: MatchStats; revealedPreds: RevealedPrediction[] }) {
   const time = new Date(match.match_date).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Helsinki' })
-  const isScheduled = match.status === 'SCHEDULED'
+  const isScheduled = match.status === 'SCHEDULED' && new Date(match.match_date) > new Date()
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
   const isFinished = match.status === 'FINISHED'
   const hasPrediction = prediction !== null
