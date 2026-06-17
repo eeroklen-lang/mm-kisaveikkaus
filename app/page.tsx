@@ -4,6 +4,7 @@ import PredictionForm from '@/app/components/PredictionForm'
 import DisplayNameEditor from '@/app/components/DisplayNameEditor'
 import { getFlag, getTeamName } from '@/lib/team-flags'
 import WelcomeModal from '@/app/components/WelcomeModal'
+import ScrollToMatch from '@/app/components/ScrollToMatch'
 import Link from 'next/link'
 
 type Match = {
@@ -129,7 +130,7 @@ function RevealedPredictions({ preds, match }: { preds: RevealedPrediction[]; ma
   )
 }
 
-function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; prediction: Prediction | null; stats: MatchStats; revealedPreds: RevealedPrediction[] }) {
+function MatchCard({ match, prediction, stats, revealedPreds, id }: { match: Match; prediction: Prediction | null; stats: MatchStats; revealedPreds: RevealedPrediction[]; id?: string }) {
   const time = new Date(match.match_date).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Helsinki' })
   const isScheduled = match.status === 'SCHEDULED' && new Date(match.match_date) > new Date()
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
@@ -143,7 +144,7 @@ function MatchCard({ match, prediction, stats, revealedPreds }: { match: Match; 
     'border-l-orange-500'
 
   return (
-    <div className={`bg-slate-800 rounded-xl border border-slate-700 border-l-4 ${borderColor} px-4 py-3`}>
+    <div id={id} className={`bg-slate-800 rounded-xl border border-slate-700 border-l-4 ${borderColor} px-4 py-3`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">{time}</span>
@@ -276,6 +277,9 @@ export default async function Home({
   const allMatches = matches ?? []
   const scheduled = allMatches.filter((m) => m.status === 'SCHEDULED')
   const missing = scheduled.filter((m) => !predictionMap.has(m.id)).length
+  const nextMatchId = allMatches.find(
+    (m) => m.status === 'SCHEDULED' && new Date(m.match_date) > new Date()
+  )?.id ?? null
   const visibleMatches =
     filter === 'tulevat' ? allMatches.filter((m) => m.status === 'SCHEDULED') :
     filter === 'menneet' ? allMatches.filter((m) => m.status !== 'SCHEDULED') :
@@ -284,6 +288,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-slate-900">
+      {nextMatchId !== null && <ScrollToMatch id="next-match" />}
       {!profile?.onboarded && <WelcomeModal />}
       <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -346,6 +351,7 @@ export default async function Home({
               {dayMatches.map((match: Match) => (
                 <MatchCard
                   key={match.id}
+                  id={match.id === nextMatchId ? 'next-match' : undefined}
                   match={match}
                   prediction={predictionMap.get(match.id) ?? null}
                   stats={computeStats(allPredsByMatch.get(match.id) ?? [], match)}
