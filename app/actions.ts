@@ -6,6 +6,11 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { randomBytes } from 'crypto'
 
+function isAdmin(email: string | null | undefined): boolean {
+  if (!email) return false
+  return (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim()).includes(email)
+}
+
 const STAGE_MAP: Record<string, string> = {
   GROUP_STAGE: 'Lohkovaihe',
   ROUND_OF_16: 'Kahdeksasfinaalit',
@@ -24,7 +29,7 @@ function calcPoints(ph: number, pa: number, ah: number, aa: number): number {
 export async function syncMatches() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== process.env.ADMIN_EMAIL) return { error: 'Ei oikeuksia' }
+  if (!isAdmin(user?.email)) return { error: 'Ei oikeuksia' }
 
   const admin = createAdminClient()
 
@@ -229,7 +234,7 @@ export async function updateDisplayName(_: unknown, formData: FormData) {
 export async function createInviteCode(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== process.env.ADMIN_EMAIL) return
+  if (!isAdmin(user?.email)) return
 
   const customCode = (formData.get('custom_code') as string | null)?.trim().toUpperCase()
   const code = customCode || randomBytes(3).toString('hex').toUpperCase()
@@ -242,7 +247,7 @@ export async function createInviteCode(formData: FormData): Promise<void> {
 export async function updateMatchResult(_: unknown, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== process.env.ADMIN_EMAIL) return { error: 'Ei oikeuksia' }
+  if (!isAdmin(user?.email)) return { error: 'Ei oikeuksia' }
 
   const admin = createAdminClient()
   const matchId = Number(formData.get('match_id'))
@@ -281,7 +286,7 @@ export async function updateMatchResult(_: unknown, formData: FormData) {
 export async function toggleInviteCode(code: string, isActive: boolean) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== process.env.ADMIN_EMAIL) return
+  if (!isAdmin(user?.email)) return
 
   await supabase.from('invite_codes').update({ is_active: isActive }).eq('code', code)
   revalidatePath('/admin')

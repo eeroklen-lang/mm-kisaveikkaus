@@ -9,7 +9,8 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (user?.email !== process.env.ADMIN_EMAIL) redirect('/')
+  const admins = (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim())
+  if (!admins.includes(user?.email ?? '')) redirect('/')
 
   const [{ data: codes }, { data: openMatches }] = await Promise.all([
     supabase.from('invite_codes').select('*').order('created_at', { ascending: false }),

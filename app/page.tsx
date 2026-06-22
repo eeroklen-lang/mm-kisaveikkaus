@@ -296,7 +296,7 @@ export default async function Home({
           <div className="flex items-center gap-3">
             <Link href="/tulokset" className="hidden md:block text-sm text-blue-400 hover:underline">Tulostaulu</Link>
             <Link href="/liity" className="hidden md:block text-sm text-blue-400 hover:underline">Liity porukkaan</Link>
-            {user!.email === process.env.ADMIN_EMAIL && (
+            {(process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim()).includes(user!.email ?? '') && (
               <Link href="/admin" className="text-sm text-slate-600 hover:underline">Admin</Link>
             )}
             <form action={logout}>
