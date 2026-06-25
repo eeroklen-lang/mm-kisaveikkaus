@@ -69,30 +69,52 @@ export async function syncMatches() {
     (m: any) => m.status === 'FINISHED' && m.home_score !== null && m.away_score !== null
   )
 
+  let debugInfo = { finished: 0, dbMatches: 0, preds: 0, updated: 0 }
+
   if (finished.length > 0) {
-    const { data: dbMatches } = await admin
+    debugInfo.finished = finished.length
+
+    const { data: dbMatches, error: dbMatchesError } = await admin
       .from('matches')
       .select('id, api_id, home_score, away_score')
       .in('api_id', finished.map((m: any) => m.api_id))
 
+    if (dbMatchesError) return { error: `dbMatches: ${dbMatchesError.message}` }
+    debugInfo.dbMatches = dbMatches?.length ?? 0
+
     const matchMap = new Map((dbMatches ?? []).map((m) => [m.api_id, m]))
 
-    const { data: preds } = await admin
+    const { data: preds, error: predsError } = await admin
       .from('predictions')
       .select('id, match_id, home_score, away_score')
       .in('match_id', (dbMatches ?? []).map((m) => m.id))
 
+    if (predsError) return { error: `preds: ${predsError.message}` }
+    debugInfo.preds = preds?.length ?? 0
+
+    const byPoints = new Map<number, number[]>()
     for (const pred of preds ?? []) {
       const match = [...matchMap.values()].find((m) => m.id === pred.match_id)
       if (!match) continue
       const points = calcPoints(pred.home_score, pred.away_score, match.home_score, match.away_score)
-      await admin.from('predictions').update({ points }).eq('id', pred.id)
+      const ids = byPoints.get(points) ?? []
+      ids.push(pred.id)
+      byPoints.set(points, ids)
     }
+
+    const updateResults = await Promise.all(
+      [...byPoints.entries()].map(([points, ids]) =>
+        admin.from('predictions').update({ points }).in('id', ids)
+      )
+    )
+    const updateError = updateResults.find(r => r.error)
+    if (updateError?.error) return { error: `update: ${updateError.error.message}` }
+    debugInfo.updated = [...byPoints.values()].reduce((s, ids) => s + ids.length, 0)
   }
 
   revalidatePath('/')
   revalidatePath('/tulokset')
-  return { success: true, count: matches.length }
+  return { success: true, count: matches.length, debug: debugInfo }
 }
 
 export async function requestPasswordReset(_: unknown, formData: FormData) {
@@ -273,10 +295,18 @@ export async function updateMatchResult(_: unknown, formData: FormData) {
     .select('id, home_score, away_score')
     .eq('match_id', matchId)
 
+  const byPoints = new Map<number, number[]>()
   for (const pred of preds ?? []) {
     const points = calcPoints(pred.home_score, pred.away_score, homeScore, awayScore)
-    await admin.from('predictions').update({ points }).eq('id', pred.id)
+    const ids = byPoints.get(points) ?? []
+    ids.push(pred.id)
+    byPoints.set(points, ids)
   }
+  await Promise.all(
+    [...byPoints.entries()].map(([points, ids]) =>
+      admin.from('predictions').update({ points }).in('id', ids)
+    )
+  )
 
   revalidatePath('/')
   revalidatePath('/tulokset')

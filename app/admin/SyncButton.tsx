@@ -19,7 +19,9 @@ export default function SyncButton() {
           {pending ? 'Synkronoidaan...' : 'Synkronoi nyt'}
         </button>
         {state?.success && (
-          <span className="text-green-400 text-sm">Valmis — {state.count} peliä haettu</span>
+          <span className="text-green-400 text-sm">
+            Valmis — {state.count} peliä | {state.debug?.finished ?? 0} valmistunutta | {state.debug?.preds ?? 0} veikkausta | {state.debug?.updated ?? 0} päivitetty
+          </span>
         )}
         {state?.error && (
           <span className="text-red-400 text-sm">{state.error}</span>
