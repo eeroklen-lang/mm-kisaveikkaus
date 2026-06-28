@@ -12,7 +12,9 @@ export default function PredictionForm({ matchId, prediction }: Props) {
   const [state, action, pending] = useActionState(savePrediction, null)
 
   return (
-    <form action={action} className="flex items-center gap-2 mt-2">
+    <form action={action} className="mt-2 space-y-1.5">
+      <p className="text-xs text-slate-600">Veikkaa 90 min tulos (jatkoaika ei huomioida)</p>
+      <div className="flex items-center gap-2">
       <input type="hidden" name="match_id" value={matchId} />
       <input
         name="home_score"
@@ -40,6 +42,7 @@ export default function PredictionForm({ matchId, prediction }: Props) {
       >
         {pending ? '...' : state?.success ? 'Tallennettu!' : prediction ? 'Päivitä' : 'Tallenna'}
       </button>
+      </div>
     </form>
   )
 }
