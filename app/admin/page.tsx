@@ -12,10 +12,10 @@ export default async function AdminPage() {
   const admins = (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim())
   if (!admins.includes(user?.email ?? '')) redirect('/')
 
-  const [{ data: codes }, { data: openMatches }] = await Promise.all([
+  const [{ data: codes }, { data: allMatches }] = await Promise.all([
     supabase.from('invite_codes').select('*').order('created_at', { ascending: false }),
     supabase.from('matches').select('id, home_team, away_team, match_date, status')
-      .neq('status', 'FINISHED').order('match_date'),
+      .order('match_date'),
   ])
 
   return (
@@ -32,8 +32,8 @@ export default async function AdminPage() {
 
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
           <h2 className="font-semibold text-slate-100 mb-1">Syötä tulos manuaalisesti</h2>
-          <p className="text-xs text-slate-500 mb-3">Käytä jos API ei päivity automaattisesti</p>
-          <ResultForm matches={openMatches ?? []} />
+          <p className="text-xs text-slate-500 mb-3">Käytä jos API ei päivity automaattisesti. Voit päivittää myös jo valmistuneen pelin tuloksen.</p>
+          <ResultForm matches={allMatches ?? []} />
         </div>
 
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
