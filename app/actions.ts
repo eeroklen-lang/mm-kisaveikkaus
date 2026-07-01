@@ -58,11 +58,36 @@ export async function syncMatches() {
       away_score: m.score?.fullTime?.away ?? null,
     }))
 
-  const { error: upsertError } = await admin
+  // Suojaa käsin syötetyt tulokset: haetaan jo FINISHED-tilassa olevat pelit
+  // Lukitaan vain pelit joilla on FINISHED-status JA ei-null tulokset
+  // (null-tulosilla olevat pelit voivat vielä saada oikean tuloksen API:sta)
+  const { data: dbFinished, error: dbFinishedError } = await admin
     .from('matches')
-    .upsert(upsertData, { onConflict: 'api_id' })
+    .select('api_id')
+    .eq('status', 'FINISHED')
+    .not('home_score', 'is', null)
+    .not('away_score', 'is', null)
 
-  if (upsertError) return { error: upsertError.message }
+  if (dbFinishedError) return { error: `Lukittujen pelien haku epäonnistui: ${dbFinishedError.message}` }
+
+  // String-muunnos estää bigint vs number -tyyppimismatching Set-vertailussa
+  const lockedApiIds = new Set((dbFinished ?? []).map((m: any) => String(m.api_id)))
+
+  // Lukitut pelit: päivitetään vain metadata, ei tulosta eikä statusta
+  const unlockedData = upsertData.filter((m: any) => !lockedApiIds.has(String(m.api_id)))
+  const lockedMetadata = upsertData
+    .filter((m: any) => lockedApiIds.has(String(m.api_id)))
+    .map((m: any) => ({ api_id: m.api_id, home_team: m.home_team, away_team: m.away_team, match_date: m.match_date, stage: m.stage }))
+
+  if (unlockedData.length > 0) {
+    const { error: upsertError } = await admin.from('matches').upsert(unlockedData, { onConflict: 'api_id' })
+    if (upsertError) return { error: upsertError.message }
+  }
+
+  if (lockedMetadata.length > 0) {
+    const { error: lockedError } = await admin.from('matches').upsert(lockedMetadata, { onConflict: 'api_id' })
+    if (lockedError) return { error: lockedError.message }
+  }
 
   // Päivitä pisteet valmistuneille peleille
   const finished = upsertData.filter(
